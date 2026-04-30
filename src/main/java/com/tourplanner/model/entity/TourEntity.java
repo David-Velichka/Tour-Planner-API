@@ -13,12 +13,18 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "tours")
+@Getter
+@Setter
+@NoArgsConstructor
 public class TourEntity {
 
     @Id
@@ -61,102 +67,4 @@ public class TourEntity {
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY)
     private List<TourLogEntity> tourLogs = new ArrayList<>();
 
-    public TourEntity() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public UserEntity getUser() {
-        return user;
-    }
-
-    public void setUser(UserEntity user) {
-        this.user = user;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public String getTo() {
-        return to;
-    }
-
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public TransportType getTransportType() {
-        return transportType;
-    }
-
-    public void setTransportType(TransportType transportType) {
-        this.transportType = transportType;
-    }
-
-    public Double getTourDistance() {
-        return tourDistance;
-    }
-
-    public void setTourDistance(Double tourDistance) {
-        this.tourDistance = tourDistance;
-    }
-
-    public Integer getEstimatedTime() {
-        return estimatedTime;
-    }
-
-    public void setEstimatedTime(Integer estimatedTime) {
-        this.estimatedTime = estimatedTime;
-    }
-
-    public String getRouteInformation() {
-        return routeInformation;
-    }
-
-    public void setRouteInformation(String routeInformation) {
-        this.routeInformation = routeInformation;
-    }
-
-    public String getImageFilenameOrReference() {
-        return imageFilenameOrReference;
-    }
-
-    public void setImageFilenameOrReference(String imageFilenameOrReference) {
-        this.imageFilenameOrReference = imageFilenameOrReference;
-    }
-
-    public List<TourLogEntity> getTourLogs() {
-        return tourLogs;
-    }
-
-    public void setTourLogs(List<TourLogEntity> tourLogs) {
-        this.tourLogs = tourLogs;
-    }
 }
