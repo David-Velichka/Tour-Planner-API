@@ -1,12 +1,15 @@
 package com.tourplanner.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public record TourLogCreateRequestDto(
-    Long tourId,
-    String loggedAt,
-    String comment,
-    Integer difficulty,
-    Double totalDistanceKm,
-    Integer totalTimeMin,
-    Integer rating
+    @NotNull Long tourId,
+    @NotBlank String loggedAt,
+    @NotBlank String comment,
+    @NotNull Integer difficulty,
+    @NotNull Double totalDistanceKm,
+    @NotNull Integer totalTimeMin,
+    @NotNull Integer rating
 ) {
 }

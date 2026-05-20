@@ -1,4 +1,6 @@
 package com.tourplanner.dto;
 
-public record SearchRequestDto(String query) {
+import jakarta.validation.constraints.NotNull;
+
+public record SearchRequestDto(@NotNull String query) {
 }

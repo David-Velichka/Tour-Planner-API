@@ -1,4 +1,9 @@
 package com.tourplanner.dto;
 
-public record AuthRegisterRequestDto(String username, String password) {
+import jakarta.validation.constraints.NotBlank;
+
+public record AuthRegisterRequestDto(
+	@NotBlank String username,
+	@NotBlank String password
+) {
 }

@@ -1,18 +1,21 @@
 package com.tourplanner.dto;
 
 import com.tourplanner.model.entity.TransportType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record TourExportDto(
-    String name,
-    String description,
-    String from,
-    String to,
-    TransportType transportType,
-    Double distanceKm,
-    Integer estimatedTimeMin,
-    String routeGeometry,
+    @NotBlank String name,
+    @NotBlank String description,
+    @NotBlank String from,
+    @NotBlank String to,
+    @NotNull TransportType transportType,
+    @NotNull Double distanceKm,
+    @NotNull Integer estimatedTimeMin,
+    @NotBlank String routeGeometry,
     String imageFilePath,
-    List<TourLogExportDto> logs
+    @NotNull @Valid List<TourLogExportDto> logs
 ) {
 }
