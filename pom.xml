@@ -81,6 +81,31 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M8</version>
+				<configuration>
+					<forkCount>0</forkCount>
+					<reuseForks>false</reuseForks>
+					<environmentVariables>
+						<TP_DB_URL>${env.TP_DB_URL}</TP_DB_URL>
+						<TP_DB_USER>${env.TP_DB_USER}</TP_DB_USER>
+						<TP_DB_PASSWORD>${env.TP_DB_PASSWORD}</TP_DB_PASSWORD>
+						<TP_HIBERNATE_DIALECT>${env.TP_HIBERNATE_DIALECT}</TP_HIBERNATE_DIALECT>
+						<TP_ORS_API_KEY>${env.TP_ORS_API_KEY}</TP_ORS_API_KEY>
+						<TP_IMAGE_STORAGE_PATH>${env.TP_IMAGE_STORAGE_PATH}</TP_IMAGE_STORAGE_PATH>
+					</environmentVariables>
+					<systemPropertyVariables>
+						<spring.datasource.url>${env.TP_DB_URL}</spring.datasource.url>
+						<spring.datasource.username>${env.TP_DB_USER}</spring.datasource.username>
+						<spring.datasource.password>${env.TP_DB_PASSWORD}</spring.datasource.password>
+						<spring.jpa.database-platform>${env.TP_HIBERNATE_DIALECT}</spring.jpa.database-platform>
+						<tourplanner.ors.api-key>${env.TP_ORS_API_KEY}</tourplanner.ors.api-key>
+						<tourplanner.image.storage-path>${env.TP_IMAGE_STORAGE_PATH}</tourplanner.image.storage-path>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>

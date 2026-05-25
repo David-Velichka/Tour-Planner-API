@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class DemoApplicationTests {
 
-    // Datenbank muss aktiviert werden
+	// Context load test.
 	@Test
 	void contextLoads() {
 	}
