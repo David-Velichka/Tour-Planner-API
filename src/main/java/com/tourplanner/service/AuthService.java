@@ -45,4 +45,8 @@ public class AuthService {
 
         return new AuthResponseDto(user.getId(), user.getUsername());
     }
+
+    public boolean userExists(@NotNull Long userId) {
+        return userRepository.existsById(userId);
+    }
 }
