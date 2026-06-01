@@ -1,5 +1,7 @@
 package com.tourplanner.service;
 
+import com.tourplanner.dto.RouteRequestDto;
+import com.tourplanner.dto.RouteResponseDto;
 import com.tourplanner.dto.TourCreateRequestDto;
 import com.tourplanner.dto.TourListResponseDto;
 import com.tourplanner.dto.TourResponseDto;
@@ -18,10 +20,12 @@ public class TourService {
 
     private final TourRepository tourRepository;
     private final UserRepository userRepository;
+    private final RouteService routeService;
 
-    public TourService(TourRepository tourRepository, UserRepository userRepository) {
+    public TourService(TourRepository tourRepository, UserRepository userRepository, RouteService routeService) {
         this.tourRepository = tourRepository;
         this.userRepository = userRepository;
+        this.routeService = routeService;
     }
 
     public TourResponseDto createTour(Long userId, TourCreateRequestDto request) {
@@ -36,7 +40,14 @@ public class TourService {
         tour.setTo(request.to());
         tour.setTransportType(request.transportType());
         tour.setImageFilenameOrReference(request.imageFilePath());
-        // distance/time/route are set via ORS integration later
+
+        // Retrieve route data from ORS and persist with the tour
+        RouteResponseDto route = routeService.getRoute(
+            new RouteRequestDto(request.from(), request.to(), request.transportType())
+        );
+        tour.setTourDistance(route.distanceKm());
+        tour.setEstimatedTime(route.estimatedTimeMin());
+        tour.setRouteInformation(route.routeGeometry());
 
         return toResponseDto(tourRepository.save(tour));
     }
@@ -57,6 +68,14 @@ public class TourService {
         tour.setTo(request.to());
         tour.setTransportType(request.transportType());
         tour.setImageFilenameOrReference(request.imageFilePath());
+
+        // Re-retrieve route data when from/to/type changes
+        RouteResponseDto route = routeService.getRoute(
+            new RouteRequestDto(request.from(), request.to(), request.transportType())
+        );
+        tour.setTourDistance(route.distanceKm());
+        tour.setEstimatedTime(route.estimatedTimeMin());
+        tour.setRouteInformation(route.routeGeometry());
 
         return toResponseDto(tourRepository.save(tour));
     }

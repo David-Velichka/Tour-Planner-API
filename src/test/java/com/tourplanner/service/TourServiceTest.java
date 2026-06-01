@@ -1,5 +1,6 @@
 package com.tourplanner.service;
 
+import com.tourplanner.dto.RouteResponseDto;
 import com.tourplanner.dto.TourCreateRequestDto;
 import com.tourplanner.dto.TourListResponseDto;
 import com.tourplanner.dto.TourResponseDto;
@@ -10,8 +11,10 @@ import com.tourplanner.repository.UserRepository;
 import com.tourplanner.model.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,11 +39,17 @@ class TourServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    // Mock ORS calls so tests do not make real HTTP requests
+    @MockitoBean
+    private RouteService routeService;
+
     private Long userId;
     private Long otherUserId;
 
     @BeforeEach
     void createUsers() {
+        Mockito.when(routeService.getRoute(Mockito.any()))
+            .thenReturn(new RouteResponseDto(10.5, 90, "[]"));
         UserEntity user = new UserEntity();
         user.setUsername("tour-owner");
         user.setPasswordHash("secret");
