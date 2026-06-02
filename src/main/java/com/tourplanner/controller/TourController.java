@@ -4,8 +4,11 @@ import com.tourplanner.dto.TourCreateRequestDto;
 import com.tourplanner.dto.TourListResponseDto;
 import com.tourplanner.dto.TourResponseDto;
 import com.tourplanner.dto.TourUpdateRequestDto;
+import com.tourplanner.dto.SearchResponseDto;
 import com.tourplanner.service.TourService;
+import com.tourplanner.service.SearchService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,9 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class TourController {
 
     private final TourService tourService;
+    private final SearchService searchService;
 
-    public TourController(TourService tourService) {
+    public TourController(TourService tourService, SearchService searchService) {
         this.tourService = tourService;
+        this.searchService = searchService;
     }
 
     @PostMapping
@@ -60,5 +66,13 @@ public class TourController {
     ) {
         tourService.deleteTour(userId, id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<SearchResponseDto> searchTours(
+        @RequestHeader("X-User-Id") Long userId,
+        @RequestParam @NotBlank String q
+    ) {
+        return ResponseEntity.ok(searchService.search(userId, q));
     }
 }

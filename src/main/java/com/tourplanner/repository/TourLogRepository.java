@@ -13,4 +13,7 @@ public interface TourLogRepository extends JpaRepository<TourLogEntity, Long> {
 
     // All logs for a given tour
     List<TourLogEntity> findAllByTourId(Long tourId);
+
+    // Count logs for a given tour (used for popularity)
+    int countByTourId(Long tourId);
 }

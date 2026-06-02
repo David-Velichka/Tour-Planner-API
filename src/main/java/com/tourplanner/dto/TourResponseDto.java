@@ -12,6 +12,10 @@ public record TourResponseDto(
     Double distanceKm,
     Integer estimatedTimeMin,
     String routeGeometry,
-    String imageFilePath
+    String imageFilePath,
+    // computed: number of logs for this tour
+    int popularity,
+    // computed: child-friendliness derived from log difficulty, distance, time
+    String childFriendliness
 ) {
 }

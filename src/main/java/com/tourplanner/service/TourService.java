@@ -8,7 +8,9 @@ import com.tourplanner.dto.TourResponseDto;
 import com.tourplanner.dto.TourUpdateRequestDto;
 import com.tourplanner.exception.ServiceException;
 import com.tourplanner.model.entity.TourEntity;
+import com.tourplanner.model.entity.TourLogEntity;
 import com.tourplanner.model.entity.UserEntity;
+import com.tourplanner.repository.TourLogRepository;
 import com.tourplanner.repository.TourRepository;
 import com.tourplanner.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -21,11 +23,13 @@ public class TourService {
     private final TourRepository tourRepository;
     private final UserRepository userRepository;
     private final RouteService routeService;
+    private final TourLogRepository tourLogRepository;
 
-    public TourService(TourRepository tourRepository, UserRepository userRepository, RouteService routeService) {
+    public TourService(TourRepository tourRepository, UserRepository userRepository, RouteService routeService, TourLogRepository tourLogRepository) {
         this.tourRepository = tourRepository;
         this.userRepository = userRepository;
         this.routeService = routeService;
+        this.tourLogRepository = tourLogRepository;
     }
 
     public TourResponseDto createTour(Long userId, TourCreateRequestDto request) {
@@ -88,6 +92,8 @@ public class TourService {
     }
 
     private TourResponseDto toResponseDto(TourEntity tour) {
+        int popularity = tourLogRepository.countByTourId(tour.getId());
+        String childFriendliness = computeChildFriendliness(tour.getId());
         return new TourResponseDto(
             tour.getId(),
             tour.getName(),
@@ -98,7 +104,34 @@ public class TourService {
             tour.getTourDistance(),
             tour.getEstimatedTime(),
             tour.getRouteInformation(),
-            tour.getImageFilenameOrReference()
+            tour.getImageFilenameOrReference(),
+            popularity,
+            childFriendliness
         );
+    }
+
+    /**
+     * Derives child-friendliness from log data.
+     * "Yes"      -> avg difficulty <= 2, avg distance <= 10 km, avg time <= 120 min
+     * "No"       -> avg difficulty >= 4, or avg distance > 30 km, or avg time > 300 min
+     * "Moderate" -> everything else
+     * "Unknown"  -> no logs recorded yet
+     */
+    private String computeChildFriendliness(Long tourId) {
+        List<TourLogEntity> logs = tourLogRepository.findAllByTourId(tourId);
+        if (logs.isEmpty()) {
+            return "Unknown";
+        }
+        double avgDifficulty = logs.stream().mapToInt(TourLogEntity::getDifficulty).average().orElse(0);
+        double avgDistance = logs.stream().mapToDouble(TourLogEntity::getTotalDistance).average().orElse(0);
+        double avgTime = logs.stream().mapToInt(TourLogEntity::getTotalTime).average().orElse(0);
+
+        if (avgDifficulty >= 4 || avgDistance > 30 || avgTime > 300) {
+            return "No";
+        }
+        if (avgDifficulty <= 2 && avgDistance <= 10 && avgTime <= 120) {
+            return "Yes";
+        }
+        return "Moderate";
     }
 }
