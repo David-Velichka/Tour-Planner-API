@@ -3,6 +3,7 @@ package com.tourplanner.service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 import com.tourplanner.dto.RouteRequestDto;
 import com.tourplanner.dto.RouteResponseDto;
 import com.tourplanner.exception.ServiceException;
@@ -74,10 +75,11 @@ public class RouteService {
         }
     }
 
-    // Calls ORS Directions API and returns distance, time and route geometry
+    // Calls ORS Directions API and returns distance, time, route geometry and elevation data
     private RouteResponseDto callDirections(double[] from, double[] to, String profile) {
         Map<String, Object> body = Map.of(
-            "coordinates", new double[][]{{from[0], from[1]}, {to[0], to[1]}}
+            "coordinates", new double[][]{{from[0], from[1]}, {to[0], to[1]}},
+            "elevation", true
         );
 
         String json;
@@ -95,21 +97,48 @@ public class RouteService {
 
         try {
             JsonNode feature = objectMapper.readTree(json).path("features").get(0);
-            JsonNode summary = feature.path("properties").path("summary");
+            JsonNode properties = feature.path("properties");
+            JsonNode summary = properties.path("summary");
             double distMeters = summary.path("distance").asDouble();
             double durSeconds = summary.path("duration").asDouble();
-            // Store coordinates as JSON string for Leaflet rendering in the UI
-            String geometry = objectMapper.writeValueAsString(
-                feature.path("geometry").path("coordinates")
-            );
+
+            // ORS returns [lon, lat, elevation] triples when elevation=true
+            JsonNode coords3d = feature.path("geometry").path("coordinates");
+
+            // 2D geometry for Leaflet (strip elevation Z component)
+            String geometry2d = objectMapper.writeValueAsString(buildStripped2dArray(coords3d));
+
+
+            // Full 3D profile for elevation chart
+            String elevationProfile = objectMapper.writeValueAsString(coords3d);
+
+            // Ascent/descent from ORS response (available when elevation=true)
+            Double ascentM = properties.hasNonNull("ascent") ? properties.path("ascent").asDouble() : null;
+            Double descentM = properties.hasNonNull("descent") ? properties.path("descent").asDouble() : null;
+
             return new RouteResponseDto(
                 Math.round(distMeters / 10.0) / 100.0,   // meters -> km, 2 decimals
                 (int) Math.ceil(durSeconds / 60.0),        // seconds -> minutes
-                geometry
+                geometry2d,
+                elevationProfile,
+                ascentM,
+                descentM
             );
         } catch (Exception e) {
             throw new ServiceException("Failed to parse route response.", e);
         }
+    }
+
+    // Strips the elevation (Z) component from [[lon,lat,elev],...] into [[lon,lat],...]
+    private ArrayNode buildStripped2dArray(JsonNode coords3d) {
+        ArrayNode result = objectMapper.createArrayNode();
+        for (JsonNode point : coords3d) {
+            ArrayNode pair = objectMapper.createArrayNode();
+            pair.add(point.get(0).asDouble()); // lon
+            pair.add(point.get(1).asDouble()); // lat
+            result.add(pair);
+        }
+        return result;
     }
 
     // Maps TransportType to ORS routing profile

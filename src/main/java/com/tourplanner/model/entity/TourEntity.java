@@ -62,6 +62,15 @@ public class TourEntity {
     @Column(name = "image_filename_or_reference")
     private String imageFilenameOrReference;
 
+    @Column(name = "elevation_profile", columnDefinition = "TEXT")
+    private String elevationProfile;
+
+    @Column(name = "ascent_m")
+    private Double ascentM;
+
+    @Column(name = "descent_m")
+    private Double descentM;
+
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY)
     private List<TourLogEntity> tourLogs = new ArrayList<>();
 

@@ -55,7 +55,7 @@ class TourLogServiceTest {
     @BeforeEach
     void setup() {
         Mockito.when(routeService.getRoute(Mockito.any()))
-            .thenReturn(new RouteResponseDto(10.5, 90, "[]"));
+            .thenReturn(new RouteResponseDto(10.5, 90, "[]", null, null, null));
         UserEntity user = new UserEntity();
         user.setUsername("log-owner");
         user.setPasswordHash("secret");

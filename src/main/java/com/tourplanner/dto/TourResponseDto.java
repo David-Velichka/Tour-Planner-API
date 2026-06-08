@@ -16,6 +16,9 @@ public record TourResponseDto(
     // computed: number of logs for this tour
     int popularity,
     // computed: child-friendliness derived from log difficulty, distance, time
-    String childFriendliness
+    String childFriendliness,
+    String elevationProfile,    // 3D coordinates [[lon,lat,elev],...] as JSON string (nullable)
+    Double ascentM,             // total ascent in meters (nullable)
+    Double descentM             // total descent in meters (nullable)
 ) {
 }

@@ -53,7 +53,7 @@ class SearchServiceTest {
     @BeforeEach
     void setup() {
         Mockito.when(routeService.getRoute(Mockito.any()))
-            .thenReturn(new RouteResponseDto(15.0, 90, "[]"));
+            .thenReturn(new RouteResponseDto(15.0, 90, "[]", null, null, null));
 
         UserEntity user = new UserEntity();
         user.setUsername("search-user");

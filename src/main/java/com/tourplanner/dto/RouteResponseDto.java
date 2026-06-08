@@ -4,6 +4,9 @@ package com.tourplanner.dto;
 public record RouteResponseDto(
     Double distanceKm,          // total route distance in kilometers
     Integer estimatedTimeMin,   // estimated travel time in minutes
-    String routeGeometry        // GeoJSON coordinates array [[lon,lat],...] as JSON string
+    String routeGeometry,       // GeoJSON coordinates array [[lon,lat],...] as JSON string
+    String elevationProfile,    // 3D coordinates [[lon,lat,elev],...] as JSON string (nullable)
+    Double ascentM,             // total ascent in meters (nullable)
+    Double descentM             // total descent in meters (nullable)
 ) {
 }

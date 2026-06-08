@@ -52,6 +52,9 @@ public class TourService {
         tour.setTourDistance(route.distanceKm());
         tour.setEstimatedTime(route.estimatedTimeMin());
         tour.setRouteInformation(route.routeGeometry());
+        tour.setElevationProfile(route.elevationProfile());
+        tour.setAscentM(route.ascentM());
+        tour.setDescentM(route.descentM());
 
         return toResponseDto(tourRepository.save(tour));
     }
@@ -80,6 +83,9 @@ public class TourService {
         tour.setTourDistance(route.distanceKm());
         tour.setEstimatedTime(route.estimatedTimeMin());
         tour.setRouteInformation(route.routeGeometry());
+        tour.setElevationProfile(route.elevationProfile());
+        tour.setAscentM(route.ascentM());
+        tour.setDescentM(route.descentM());
 
         return toResponseDto(tourRepository.save(tour));
     }
@@ -106,7 +112,10 @@ public class TourService {
             tour.getRouteInformation(),
             tour.getImageFilenameOrReference(),
             popularity,
-            childFriendliness
+            childFriendliness,
+            tour.getElevationProfile(),
+            tour.getAscentM(),
+            tour.getDescentM()
         );
     }
 
