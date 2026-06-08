@@ -14,7 +14,7 @@ public record TourExportDto(
     @NotNull TransportType transportType,
     @NotNull Double distanceKm,
     @NotNull Integer estimatedTimeMin,
-    @NotBlank String routeGeometry,
+    String routeGeometry,
     String imageFilePath,
     @NotNull @Valid List<TourLogExportDto> logs
 ) {
