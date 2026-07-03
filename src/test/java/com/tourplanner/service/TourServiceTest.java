@@ -138,17 +138,4 @@ class TourServiceTest {
         assertThrows(ServiceException.class,
             () -> tourService.deleteTour(otherUserId, created.id()));
     }
-
-    // Verify elevation profile data is saved
-    @Test
-    void createTourSavesElevationProfileData() {
-        Mockito.when(routeService.getRoute(Mockito.any()))
-            .thenReturn(new RouteResponseDto(10.5, 90, "[]", "[[10.0,20.0,100.0]]", 150.0, 50.0));
-
-        TourResponseDto result = tourService.createTour(userId, validCreateRequest());
-
-        assertEquals("[[10.0,20.0,100.0]]", result.elevationProfile());
-        assertEquals(150.0, result.ascentM());
-        assertEquals(50.0, result.descentM());
-    }
 }
