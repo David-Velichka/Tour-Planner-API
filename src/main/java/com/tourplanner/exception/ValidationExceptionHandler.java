@@ -9,7 +9,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class ValidationExceptionHandler {
 
@@ -41,6 +43,7 @@ public class ValidationExceptionHandler {
     }
 
     private Map<String, Object> buildBody(Map<String, String> errors) {
+        log.warn("Validation failed for request: {}", errors);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("message", "Validation failed");
         body.put("errors", errors);

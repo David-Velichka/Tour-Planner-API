@@ -9,12 +9,14 @@ import com.tourplanner.model.entity.TourEntity;
 import com.tourplanner.model.entity.TourLogEntity;
 import com.tourplanner.repository.TourLogRepository;
 import com.tourplanner.repository.TourRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
+@Slf4j
 @Service
 public class TourLogService {
 
@@ -31,16 +33,17 @@ public class TourLogService {
         TourEntity tour = tourRepository.findByIdAndUserId(request.tourId(), userId)
             .orElseThrow(() -> new ServiceException("Tour not found."));
 
-        TourLogEntity log = new TourLogEntity();
-        log.setTour(tour);
-        log.setDateTime(parseDateTime(request.loggedAt()));
-        log.setComment(request.comment());
-        log.setDifficulty(request.difficulty());
-        log.setTotalDistance(request.totalDistanceKm());
-        log.setTotalTime(request.totalTimeMin());
-        log.setRating(request.rating());
+        TourLogEntity logEntity = new TourLogEntity();
+        logEntity.setTour(tour);
+        logEntity.setDateTime(parseDateTime(request.loggedAt()));
+        logEntity.setComment(request.comment());
+        logEntity.setDifficulty(request.difficulty());
+        logEntity.setTotalDistance(request.totalDistanceKm());
+        logEntity.setTotalTime(request.totalTimeMin());
+        logEntity.setRating(request.rating());
 
-        return toResponseDto(tourLogRepository.save(log));
+        log.info("Created tour log for tourId: {} by userId: {}", request.tourId(), userId);
+        return toResponseDto(tourLogRepository.save(logEntity));
     }
 
     public TourLogListResponseDto getLogs(Long userId, Long tourId) {
@@ -54,23 +57,31 @@ public class TourLogService {
     }
 
     public TourLogResponseDto updateLog(Long userId, Long logId, TourLogUpdateRequestDto request) {
-        TourLogEntity log = tourLogRepository.findByIdAndTourUserId(logId, userId)
-            .orElseThrow(() -> new ServiceException("Tour log not found."));
+        TourLogEntity logEntity = tourLogRepository.findByIdAndTourUserId(logId, userId)
+            .orElseThrow(() -> {
+                log.error("Failed to update tour log. Log ID {} not found for User ID {}", logId, userId);
+                return new ServiceException("Tour log not found.");
+            });
 
-        log.setDateTime(parseDateTime(request.loggedAt()));
-        log.setComment(request.comment());
-        log.setDifficulty(request.difficulty());
-        log.setTotalDistance(request.totalDistanceKm());
-        log.setTotalTime(request.totalTimeMin());
-        log.setRating(request.rating());
+        logEntity.setDateTime(parseDateTime(request.loggedAt()));
+        logEntity.setComment(request.comment());
+        logEntity.setDifficulty(request.difficulty());
+        logEntity.setTotalDistance(request.totalDistanceKm());
+        logEntity.setTotalTime(request.totalTimeMin());
+        logEntity.setRating(request.rating());
 
-        return toResponseDto(tourLogRepository.save(log));
+        log.info("Updated tour log ID {} for userId: {}", logId, userId);
+        return toResponseDto(tourLogRepository.save(logEntity));
     }
 
     public void deleteLog(Long userId, Long logId) {
-        TourLogEntity log = tourLogRepository.findByIdAndTourUserId(logId, userId)
-            .orElseThrow(() -> new ServiceException("Tour log not found."));
-        tourLogRepository.delete(log);
+        TourLogEntity logEntity = tourLogRepository.findByIdAndTourUserId(logId, userId)
+            .orElseThrow(() -> {
+                log.error("Failed to delete tour log. Log ID {} not found for User ID {}", logId, userId);
+                return new ServiceException("Tour log not found.");
+            });
+        tourLogRepository.delete(logEntity);
+        log.info("Deleted tour log ID {} for User ID {}", logId, userId);
     }
 
     private LocalDateTime parseDateTime(String dateTimeStr) {

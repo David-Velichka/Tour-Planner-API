@@ -13,10 +13,12 @@ import com.tourplanner.model.entity.UserEntity;
 import com.tourplanner.repository.TourLogRepository;
 import com.tourplanner.repository.TourRepository;
 import com.tourplanner.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class TourService {
 
@@ -56,6 +58,7 @@ public class TourService {
         tour.setAscentM(route.ascentM());
         tour.setDescentM(route.descentM());
 
+        log.info("Created tour for userId: {} with name: {}", userId, request.name());
         return toResponseDto(tourRepository.save(tour));
     }
 
@@ -67,7 +70,10 @@ public class TourService {
 
     public TourResponseDto updateTour(Long userId, Long tourId, TourUpdateRequestDto request) {
         TourEntity tour = tourRepository.findByIdAndUserId(tourId, userId)
-            .orElseThrow(() -> new ServiceException("Tour not found."));
+            .orElseThrow(() -> {
+                log.error("Failed to update tour. Tour ID {} not found for User ID {}", tourId, userId);
+                return new ServiceException("Tour not found.");
+            });
 
         tour.setName(request.name());
         tour.setDescription(request.description());
@@ -86,15 +92,19 @@ public class TourService {
         tour.setElevationProfile(route.elevationProfile());
         tour.setAscentM(route.ascentM());
         tour.setDescentM(route.descentM());
-
+        log.info("Updated tour for userId: {} with name: {}", userId, request.name());
         return toResponseDto(tourRepository.save(tour));
     }
 
     public void deleteTour(Long userId, Long tourId) {
         TourEntity tour = tourRepository.findByIdAndUserId(tourId, userId)
-            .orElseThrow(() -> new ServiceException("Tour not found."));
+            .orElseThrow(() -> {
+                log.error("Failed to delete tour. Tour ID {} not found for User ID {}", tourId, userId);
+                return new ServiceException("Tour not found.");
+            });
         // DB-level cascade on the FK in TourLogEntity removes related logs automatically
         tourRepository.delete(tour);
+        log.info("Deleted tour ID {} for User ID {}", tourId, userId);
     }
 
     private TourResponseDto toResponseDto(TourEntity tour) {
