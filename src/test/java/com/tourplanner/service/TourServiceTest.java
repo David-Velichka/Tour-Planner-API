@@ -138,4 +138,17 @@ class TourServiceTest {
         assertThrows(ServiceException.class,
             () -> tourService.deleteTour(otherUserId, created.id()));
     }
+
+    // Elevation profile data is stored when ORS returns it
+    @Test
+    void createTourSavesElevationProfileData() {
+        Mockito.when(routeService.getRoute(Mockito.any()))
+            .thenReturn(new RouteResponseDto(10.5, 90, "[]", "[[8.0,48.0,200],[8.1,48.1,350]]", 150.0, 50.0));
+
+        TourResponseDto result = tourService.createTour(userId, validCreateRequest());
+
+        assertNotNull(result.elevationProfile());
+        assertEquals(150.0, result.ascentM());
+        assertEquals(50.0, result.descentM());
+    }
 }

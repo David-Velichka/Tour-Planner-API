@@ -157,6 +157,18 @@ class SearchServiceTest {
         assertEquals(1, result.tours().size());
     }
 
+    // childFriendliness is Moderate for medium-difficulty logs
+    @Test
+    void childFriendlinessIsModerateForMediumLogs() {
+        TourResponseDto tour = tourService.createTour(userId, new TourCreateRequestDto("Medium Tour", "desc", "A", "B", TransportType.HIKE, null));
+        // difficulty=3, distance=15km, time=150min -> between Yes and No thresholds
+        tourLogService.createLog(userId, new TourLogCreateRequestDto(tour.id(), "2024-01-01T10:00:00", "moderate hike", 3, 15.0, 150, 3));
+
+        List<TourResponseDto> tours = tourService.getTours(userId).tours();
+
+        assertEquals("Moderate", tours.get(0).childFriendliness());
+    }
+
     // Search by log comment returns matching tour
     @Test
     void searchByLogCommentReturnsTour() {
