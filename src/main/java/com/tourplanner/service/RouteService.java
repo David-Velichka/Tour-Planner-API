@@ -146,7 +146,7 @@ public class RouteService {
         return switch (type) {
             case BIKE -> "cycling-regular";
             case HIKE -> "foot-hiking";
-            case RUNNING -> "foot-running";
+            case RUNNING -> "foot-walking";
             case VACATION -> "driving-car";
         };
     }
