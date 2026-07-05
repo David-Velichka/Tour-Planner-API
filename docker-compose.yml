@@ -24,7 +24,6 @@ services:
       TP_DB_URL: jdbc:postgresql://db:5432/tourplanner
       TP_DB_USER: tourplanner
       TP_DB_PASSWORD: tourplanner_pw
-      TP_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       TP_ORS_API_KEY: ${TP_ORS_API_KEY}
       TP_IMAGE_STORAGE_PATH: /app/tour-images
 
