@@ -5,6 +5,7 @@ import com.tourplanner.dto.TourLogListResponseDto;
 import com.tourplanner.dto.TourLogResponseDto;
 import com.tourplanner.dto.TourLogUpdateRequestDto;
 import com.tourplanner.service.TourLogService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,34 +32,35 @@ public class TourLogController {
 
     @PostMapping
     public ResponseEntity<TourLogResponseDto> createLog(
-        @RequestHeader("X-User-Id") Long userId,
-        @Valid @RequestBody TourLogCreateRequestDto request
+        HttpServletRequest request,
+        @Valid @RequestBody TourLogCreateRequestDto body
     ) {
-        return ResponseEntity.ok(tourLogService.createLog(userId, request));
+        Long userId = (Long) request.getAttribute("userId");
+        return ResponseEntity.ok(tourLogService.createLog(userId, body));
     }
 
     @GetMapping
     public ResponseEntity<TourLogListResponseDto> getLogs(
-        @RequestHeader("X-User-Id") Long userId,
+        HttpServletRequest request,
         @RequestParam Long tourId
     ) {
+        Long userId = (Long) request.getAttribute("userId");
         return ResponseEntity.ok(tourLogService.getLogs(userId, tourId));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TourLogResponseDto> updateLog(
-        @RequestHeader("X-User-Id") Long userId,
+        HttpServletRequest request,
         @PathVariable Long id,
-        @Valid @RequestBody TourLogUpdateRequestDto request
+        @Valid @RequestBody TourLogUpdateRequestDto body
     ) {
-        return ResponseEntity.ok(tourLogService.updateLog(userId, id, request));
+        Long userId = (Long) request.getAttribute("userId");
+        return ResponseEntity.ok(tourLogService.updateLog(userId, id, body));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLog(
-        @RequestHeader("X-User-Id") Long userId,
-        @PathVariable Long id
-    ) {
+    public ResponseEntity<Void> deleteLog(HttpServletRequest request, @PathVariable Long id) {
+        Long userId = (Long) request.getAttribute("userId");
         tourLogService.deleteLog(userId, id);
         return ResponseEntity.noContent().build();
     }

@@ -4,6 +4,7 @@ import com.tourplanner.dto.ExportDataDto;
 import com.tourplanner.dto.ImportRequestDto;
 import com.tourplanner.dto.ImportResponseDto;
 import com.tourplanner.service.ImportExportService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.ObjectMapper;
@@ -32,9 +32,8 @@ public class ImportExportController {
     }
 
     @GetMapping("/export")
-    public ResponseEntity<byte[]> exportTours(
-        @RequestHeader("X-User-Id") Long userId
-    ) throws Exception {
+    public ResponseEntity<byte[]> exportTours(HttpServletRequest request) throws Exception {
+        Long userId = (Long) request.getAttribute("userId");
         ExportDataDto data = importExportService.exportData(userId);
         byte[] json = objectMapper.writeValueAsBytes(data);
 
@@ -48,9 +47,10 @@ public class ImportExportController {
 
     @PostMapping("/import")
     public ResponseEntity<ImportResponseDto> importTours(
-        @RequestHeader("X-User-Id") Long userId,
-        @Valid @RequestBody ImportRequestDto request
+        HttpServletRequest request,
+        @Valid @RequestBody ImportRequestDto body
     ) {
-        return ResponseEntity.ok(importExportService.importData(userId, request));
+        Long userId = (Long) request.getAttribute("userId");
+        return ResponseEntity.ok(importExportService.importData(userId, body));
     }
 }

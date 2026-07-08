@@ -1,5 +1,6 @@
 package com.tourplanner.service;
 
+import com.tourplanner.config.JwtService;
 import com.tourplanner.dto.AuthLoginRequestDto;
 import com.tourplanner.dto.AuthRegisterRequestDto;
 import com.tourplanner.dto.AuthResponseDto;
@@ -11,14 +12,20 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 @Validated
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     public AuthResponseDto register(@Valid @NotNull AuthRegisterRequestDto request) {
@@ -28,22 +35,23 @@ public class AuthService {
 
         UserEntity user = new UserEntity();
         user.setUsername(request.username());
-        user.setPasswordHash(request.password());
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
 
         UserEntity savedUser = userRepository.save(user);
-        return new AuthResponseDto(savedUser.getId(), savedUser.getUsername());
+        String token = jwtService.generateToken(savedUser.getId());
+        return new AuthResponseDto(token, savedUser.getUsername());
     }
 
     public AuthResponseDto login(@Valid @NotNull AuthLoginRequestDto request) {
-        // Simple credential check for student scope; no session or token handling.
         UserEntity user = userRepository.findByUsername(request.username())
             .orElseThrow(() -> new ServiceException("Invalid username or password."));
 
-        if (!user.getPasswordHash().equals(request.password())) {
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new ServiceException("Invalid username or password.");
         }
 
-        return new AuthResponseDto(user.getId(), user.getUsername());
+        String token = jwtService.generateToken(user.getId());
+        return new AuthResponseDto(token, user.getUsername());
     }
 
     public boolean userExists(@NotNull Long userId) {

@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     "spring.datasource.driver-class-name=org.h2.Driver",
     "spring.datasource.username=sa",
     "spring.datasource.password=",
-    "spring.jpa.hibernate.ddl-auto=create-drop"
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "tourplanner.jwt.secret=test-secret-key-minimum-32-chars-ok",
+    "tourplanner.jwt.expiration-hours=1"
 })
 @Transactional
 class AuthServiceTest {
@@ -34,21 +37,24 @@ class AuthServiceTest {
 
     @Test
     void registerStoresPassword() {
-        AuthRegisterRequestDto request = new AuthRegisterRequestDto("test-user", "secret");
+        AuthRegisterRequestDto request = new AuthRegisterRequestDto("test-user", "Secret12");
 
         AuthResponseDto response = authService.register(request);
 
-        assertNotNull(response.userId());
+        assertNotNull(response.token());
+        assertFalse(response.token().isBlank());
         assertEquals("test-user", response.username());
 
-        UserEntity savedUser = userRepository.findById(response.userId()).orElseThrow();
-        assertEquals("secret", savedUser.getPasswordHash());
+        // Verify password was actually stored in DB and hashed
+        UserEntity savedUser = userRepository.findByUsername("test-user").orElseThrow();
+        org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+        assertTrue(encoder.matches("Secret12", savedUser.getPasswordHash()));
     }
 
     @Test
     void registerRejectsDuplicateUsername() {
-        AuthRegisterRequestDto first = new AuthRegisterRequestDto("duplicate", "secret");
-        AuthRegisterRequestDto second = new AuthRegisterRequestDto("duplicate", "another");
+        AuthRegisterRequestDto first = new AuthRegisterRequestDto("duplicate", "Secret12");
+        AuthRegisterRequestDto second = new AuthRegisterRequestDto("duplicate", "Another12");
 
         authService.register(first);
 
@@ -58,22 +64,23 @@ class AuthServiceTest {
 
     @Test
     void loginReturnsUserOnValidCredentials() {
-        AuthRegisterRequestDto registerRequest = new AuthRegisterRequestDto("login-user", "secret");
-        AuthResponseDto registered = authService.register(registerRequest);
+        AuthRegisterRequestDto registerRequest = new AuthRegisterRequestDto("login-user", "Secret12");
+        authService.register(registerRequest);
 
-        AuthLoginRequestDto loginRequest = new AuthLoginRequestDto("login-user", "secret");
+        AuthLoginRequestDto loginRequest = new AuthLoginRequestDto("login-user", "Secret12");
         AuthResponseDto response = authService.login(loginRequest);
 
-        assertEquals(registered.userId(), response.userId());
+        assertNotNull(response.token());
+        assertFalse(response.token().isBlank());
         assertEquals("login-user", response.username());
     }
 
     @Test
     void loginRejectsInvalidCredentials() {
-        AuthRegisterRequestDto registerRequest = new AuthRegisterRequestDto("login-fail", "secret");
+        AuthRegisterRequestDto registerRequest = new AuthRegisterRequestDto("login-fail", "Secret12");
         authService.register(registerRequest);
 
-        AuthLoginRequestDto loginRequest = new AuthLoginRequestDto("login-fail", "wrong");
+        AuthLoginRequestDto loginRequest = new AuthLoginRequestDto("login-fail", "Wrong123");
 
         ServiceException ex = assertThrows(ServiceException.class, () -> authService.login(loginRequest));
         assertTrue(ex.getMessage().toLowerCase().contains("invalid"));
